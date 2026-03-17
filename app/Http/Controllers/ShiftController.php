@@ -34,6 +34,27 @@ class ShiftController extends Controller
     public function generateDay(Request $request)
     {
         $date = $request->input('date', date('Y-m-d'));
+        $this->privateGenerateDay($date);
+        return back()->with('success', 'Turnos generados automáticamente para el día ' . $date);
+    }
+
+    public function generateRange(Request $request)
+    {
+        $startDate = $request->input('date', date('Y-m-d'));
+        $days = $request->input('days', 14); // Default 2 weeks
+        
+        $carbonDate = \Carbon\Carbon::parse($startDate);
+        
+        for ($i = 0; $i < $days; $i++) {
+            $this->privateGenerateDay($carbonDate->format('Y-m-d'));
+            $carbonDate->addDay();
+        }
+
+        return back()->with('success', "Turnos generados automáticamente para las próximas $days días.");
+    }
+
+    private function privateGenerateDay($date)
+    {
         $dayOfWeek = \Carbon\Carbon::parse($date)->dayOfWeek; // 0 (Sun) - 6 (Sat)
         
         $startOfWeek = \Carbon\Carbon::parse($date)->startOfWeek()->format('Y-m-d');
@@ -122,8 +143,6 @@ class ShiftController extends Controller
                 }
             }
         }
-
-        return back()->with('success', 'Turnos generados automáticamente para el día ' . $date);
     }
 
     /**
