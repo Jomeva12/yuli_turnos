@@ -4,27 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Turnos</title>
-    <!-- Modern Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Elegant Font: Outfit -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #4F46E5;
-            --primary-hover: #4338CA;
-            --bg-body: #F9FAFB;
-            --bg-card: #FFFFFF;
-            --text-main: #111827;
-            --text-muted: #6B7280;
-            --border-color: #E5E7EB;
-            --sticky-bg: #F3F4F6;
+            --primary: #1b998b; /* Matte Green / Teal */
+            --primary-hover: #158376; /* Darker Matte Green */
+            --primary-light: #f0fdf4; /* Soft Mint / Green 50 */
+            --bg-body: #f8fafc;
+            --bg-card: #ffffff;
+            --text-main: #001d2d; /* Very Dark Navy for text */
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --nav-bg: #003049; /* Deep Navy */
         }
 
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Outfit', sans-serif;
             background-color: var(--bg-body);
             color: var(--text-main);
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden; /* Prevent global scroll */
+            display: flex;
+            flex-direction: column;
         }
 
         *, *::before, *::after {
@@ -32,92 +37,64 @@
         }
 
         .navbar {
-            background-color: var(--bg-card);
-            padding: 1rem 2rem;
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            background: var(--nav-bg);
+            padding: 0.75rem 2rem;
             display: flex;
             align-items: center;
             justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
 
         .navbar-brand {
             font-size: 1.25rem;
-            font-weight: 600;
-            color: var(--text-main);
+            font-weight: 700;
+            color: white;
             text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .navbar-brand::before {
+            content: '';
+            width: 8px;
+            height: 24px;
+            background: var(--primary);
+            border-radius: 4px;
         }
 
         .container {
+            flex: 1;
             width: 100%;
             max-width: 100%;
-            margin: 1rem auto;
-            padding: 0 1rem;
+            padding: 1.5rem;
+            min-height: 0; /* Important for children overflow */
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
 
         .layout-wrapper {
             display: flex;
             gap: 1.5rem;
-            align-items: flex-start;
+            align-items: stretch;
+            flex: 1;
+            min-height: 0;
+        }
+        
+        #content-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
         }
 
         .table-section {
             flex: 1;
             min-width: 0; /* Allow shrinking */
-        }
-
-        .summary-panel {
-            width: 300px;
-            background: var(--bg-card);
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            padding: 1.5rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            position: sticky;
-            top: 1rem;
-            max-height: calc(100vh - 120px);
-            overflow-y: auto;
-        }
-
-        .summary-title {
-            font-weight: 700;
-            font-size: 1rem;
-            margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 2px solid var(--primary);
-            color: var(--primary);
-        }
-
-        .stat-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .stat-label {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            font-weight: 600;
-            color: var(--text-muted);
-            margin-bottom: 0.5rem;
-            display: block;
-        }
-
-        .stat-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.4rem 0;
-            border-bottom: 1px dashed var(--border-color);
-        }
-
-        .stat-row:last-child {
-            border-bottom: none;
-        }
-
-        .stat-value {
-            font-weight: 600;
-            background: var(--bg-body);
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 0.85rem;
         }
 
         /* Excel-like Table Styles */
@@ -138,29 +115,29 @@
         }
 
         .current-day-column {
-            background-color: #FEF3C7 !important; /* Light amber */
-            border-left: 2px solid #F59E0B !important;
-            border-right: 2px solid #F59E0B !important;
+            background-color: #f1f5f9 !important; /* Extremely subtle tint */
+            border-left: 2px solid var(--primary) !important;
+            border-right: 2px solid var(--primary) !important;
         }
 
         .current-day-header {
-            background-color: #F59E0B !important;
-            color: white !important;
+            border-top: 4px solid var(--primary) !important;
+            color: var(--primary) !important;
+            font-weight: 700 !important;
+            background-color: #fff !important;
         }
 
-        .selected-day-header {
-            background-color: var(--primary) !important;
+        /* Fix for disappearing text in selected header */
+        .excel-table th.selected-day-header {
+            background-color: #003049 !important; /* Deep Navy */
             color: white !important;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            transform: translateY(-2px);
-            z-index: 20;
+            border-top-color: #1b998b !important; /* Matte Green accent */
+            box-shadow: 0 4px 12px rgba(0, 48, 73, 0.2);
+            z-index: 50;
         }
 
         .selected-day-column-highlight {
-            outline: 2px solid var(--primary);
-            outline-offset: -2px;
-            background-color: rgba(59, 130, 246, 0.08);
-            z-index: 10;
+            background-color: rgba(71, 85, 105, 0.04) !important; /* Subtle tint */
         }
 
         .excel-table {
@@ -223,36 +200,94 @@
             transition: all 0.2s;
         }
 
+        /* Excel-table header sticky */
         .excel-table th {
-            background-color: var(--sticky-bg);
+            background-color: white !important;
             font-weight: 600;
             color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 0.05em;
             position: sticky;
             top: 0;
-            z-index: 10;
+            z-index: 30; /* Above regular cells */
+            border-bottom: 2px solid var(--border-color) !important;
         }
 
-        /* First column sticky */
-        .excel-table th:first-child,
+        /* First column sticky cells */
         .excel-table td:first-child {
             position: sticky;
             left: 0;
-            background-color: var(--bg-card);
+            background-color: white; /* Base background */
             border-right: 2px solid var(--border-color);
-            z-index: 5;
+            z-index: 20; /* Below headers, above other cells */
             font-weight: 500;
         }
-        
-        .excel-table tr:nth-child(even) td:first-child {
-            background-color: #FAFAFA;
+
+        /* Corner header: overlaps both sticky axes */
+        .excel-table th:first-child {
+            z-index: 60; /* Highest in the table */
+            background-color: white !important;
+            left: 0;
         }
 
-        /* Corner header overlaps both sticky axes */
-        .excel-table th:first-child {
-            z-index: 15;
-            background-color: var(--sticky-bg);
+        /* Employee Cell Hover Menu */
+        .employee-cell {
+            /* Removed relative to preserve sticky positioning */
+        }
+
+        .skills-popover {
+            visibility: hidden;
+            opacity: 0;
+            position: absolute;
+            top: 50%;
+            left: 80%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            padding: 0.85rem 1.1rem;
+            border-radius: 14px;
+            box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            z-index: 200;
+            min-width: 190px;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none;
+            text-align: left;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .employee-cell:hover .skills-popover {
+            visibility: visible;
+            opacity: 1;
+            left: 105%;
+        }
+
+        .popover-header {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 0.6rem;
+            font-weight: 700;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.4rem;
+        }
+
+        .popover-skill {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.85rem;
+            padding: 5px 0;
+            color: var(--text-main);
+            font-weight: 500;
+        }
+
+        .popover-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 3px;
+            flex-shrink: 0;
         }
 
         .excel-table tbody tr:hover td {
@@ -356,7 +391,17 @@
     </div>
 
     <nav class="navbar">
-        <a href="/" class="navbar-brand">GestionTurnos v1.0</a>
+        <a href="{{ route('shifts.index') }}" class="navbar-brand">GestionTurnos v1.0</a>
+        <div style="display: flex; gap: 0.5rem; background: rgba(255,255,255,0.1); padding: 0.4rem; border-radius: 10px;">
+            <a href="{{ route('shifts.index') }}" 
+               style="text-decoration: none; font-size: 0.85rem; font-weight: 600; color: {{ request()->routeIs('shifts.index') ? 'white' : 'rgba(255,255,255,0.6)' }}; background: {{ request()->routeIs('shifts.index') ? 'var(--primary)' : 'transparent' }}; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.2s;">
+                Calendario
+            </a>
+            <a href="{{ route('employees.index') }}" 
+               style="text-decoration: none; font-size: 0.85rem; font-weight: 600; color: {{ request()->routeIs('employees.index') ? 'white' : 'rgba(255,255,255,0.6)' }}; background: {{ request()->routeIs('employees.index') ? 'var(--primary)' : 'transparent' }}; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.2s;">
+                Habilidades
+            </a>
+        </div>
     </nav>
 
     <main class="container">

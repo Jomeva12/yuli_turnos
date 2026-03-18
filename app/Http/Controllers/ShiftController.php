@@ -28,7 +28,9 @@ class ShiftController extends Controller
                ->orWhereMonth('end_date', $carbonMonth->month);
         })->get()->groupBy('employee_id');
 
-        return view('shifts.index', compact('employees', 'month', 'daysInMonth', 'shifts', 'absences'));
+        $areas = \App\Models\Area::orderBy('name')->get();
+
+        return view('shifts.index', compact('employees', 'month', 'daysInMonth', 'shifts', 'absences', 'areas'));
     }
 
     public function generateDay(Request $request)
