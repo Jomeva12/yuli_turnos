@@ -47,6 +47,25 @@ class AbsenceController extends Controller
     }
 
     /**
+     * Remove all absences for a specific month.
+     */
+    public function clearMonth(Request $request)
+    {
+        $monthStr = $request->input('month', date('Y-m'));
+        $carbonMonth = \Carbon\Carbon::parse($monthStr);
+
+        Absence::whereYear('start_date', $carbonMonth->year)
+               ->whereMonth('start_date', $carbonMonth->month)
+               ->orWhere(function($query) use ($carbonMonth) {
+                   $query->whereYear('end_date', $carbonMonth->year)
+                         ->whereMonth('end_date', $carbonMonth->month);
+               })
+               ->delete();
+
+        return back()->with('success', "Todas las novedades de " . $carbonMonth->translatedFormat('F Y') . " han sido eliminadas.");
+    }
+
+    /**
      * Remove the specified resource from storage.
      */
     public function destroy(Absence $absence)

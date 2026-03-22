@@ -40,6 +40,7 @@
             <table id="skillsTable" style="width: 100%; border-collapse: separate; border-spacing: 0; min-width: 900px;">
                 <thead>
                     <tr>
+                        <th class="sticky-index-header">#</th>
                         <th class="sticky-col-header">
                             Colaborador
                         </th>
@@ -51,7 +52,7 @@
                                 data-area-id="{{ $area->id }}"
                                 data-column-index="{{ $index + 1 }}"
                                 data-active-color="{{ $color['dot'] }}"
-                                style="padding: 1rem; background: #f8fafc; border-bottom: 2px solid var(--border-color); border-right: 1px solid var(--border-color); border-top: 4px solid {{ $color['border'] }}; min-width: 130px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; transition: all 0.2s; color: {{ $color['text'] }}; text-align: center; position: relative;">
+                                style="padding: 1rem; background: #f8fafc; border-bottom: 2px solid var(--border-color); border-right: 1px solid var(--border-color); border-top: 4px solid {{ $color['border'] }}; min-width: 130px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; transition: all 0.2s; color: {{ $color['text'] }}; text-align: center; position: sticky; top: 0; z-index: 30;">
                                 {{ $area->name }}
                                 <div class="filter-dot" style="position: absolute; bottom: 0; left: 0; width: 100%; height: 4px; background: {{ $color['dot'] }}; opacity: 0; transition: opacity 0.2s;"></div>
                             </th>
@@ -61,6 +62,9 @@
                 <tbody>
                     @foreach($employees as $employee)
                         <tr class="employee-row" data-name="{{ strtolower($employee->name) }}">
+                            <td class="sticky-index-cell">
+                                {{ $loop->iteration }}
+                            </td>
                             <td class="sticky-col-cell">
                                 {{ $employee->name }}
                             </td>
@@ -104,16 +108,48 @@
             background-color: #f8fafc !important; /* Extremely subtle hover */
         }
 
+        .sticky-index-header {
+            position: sticky !important;
+            left: 0;
+            top: 0;
+            background: #f1f5f9 !important;
+            z-index: 55;
+            border-bottom: 2px solid var(--border-color) !important;
+            border-right: 1px solid var(--border-color);
+            width: 40px;
+            padding: 1rem 0.5rem;
+            text-align: center;
+            font-weight: 700;
+            color: #475569;
+            font-size: 0.75rem;
+        }
+
+        .sticky-index-cell {
+            position: sticky !important;
+            left: 0;
+            background: white !important;
+            z-index: 25;
+            border-bottom: 1px solid var(--border-color);
+            border-right: 1px solid var(--border-color);
+            width: 40px;
+            padding: 0.85rem 0.5rem;
+            text-align: center;
+            font-weight: 600;
+            color: #64748b;
+            font-size: 0.85rem;
+        }
+
         .sticky-col-header {
             text-align: left;
             padding: 1rem;
             position: sticky !important;
-            left: 0;
+            left: 40px;
+            top: 0;
             background: #f1f5f9 !important;
-            z-index: 40;
+            z-index: 50;
             border-bottom: 2px solid var(--border-color) !important;
             border-right: 2px solid var(--border-color);
-            width: 260px;
+            width: 220px;
             font-weight: 700;
             color: #475569;
             font-size: 0.8rem;
@@ -124,7 +160,7 @@
         .sticky-col-cell {
             padding: 0.85rem 1rem;
             position: sticky !important;
-            left: 0;
+            left: 40px;
             background: white !important;
             z-index: 20;
             border-bottom: 1px solid var(--border-color);
@@ -135,7 +171,8 @@
             box-shadow: 2px 0 5px rgba(0,0,0,0.02);
         }
 
-        .employee-row:hover .sticky-col-cell {
+        .employee-row:hover .sticky-col-cell,
+        .employee-row:hover .sticky-index-cell {
             background-color: #f8fafc !important;
         }
 
@@ -145,7 +182,9 @@
         }
 
         .skill-header {
-            position: relative;
+            position: sticky;
+            top: 0;
+            z-index: 30;
         }
 
         .filter-dot {

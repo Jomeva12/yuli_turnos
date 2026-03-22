@@ -32,14 +32,32 @@
         <div>
             <h1 style="margin: 0; font-size: 1.75rem; font-weight: 700; color: var(--text-main);">Planilla de Turnos</h1>
             <div style="display: flex; align-items: center; gap: 1.5rem; margin-top: 0.5rem;">
-                <p style="color: var(--text-muted); margin: 0; font-size: 0.95rem; text-transform: capitalize; font-weight: 500;">
-                    {{ \Carbon\Carbon::parse($month)->translatedFormat('F Y') }}
-                </p>
-                <!-- Compact Legend -->
-                <div style="display: flex; gap: 1rem; font-size: 0.75rem; color: var(--text-muted); align-items: center; background: #f8fafc; padding: 0.25rem 0.75rem; border-radius: 20px; border: 1px solid var(--border-color);">
-                    <div style="display: flex; align-items: center; gap: 0.4rem;"><div style="width: 8px; height: 8px; border-radius: 50%; background: #fee2e2; border: 1px solid #fecaca;"></div><span>Partido</span></div>
-                    <div style="display: flex; align-items: center; gap: 0.4rem;"><div style="width: 8px; height: 8px; border-radius: 50%; background: #dcfce7; border: 1px solid #bbf7d0;"></div><span>General</span></div>
-                    <div style="display: flex; align-items: center; gap: 0.4rem;"><div style="width: 8px; height: 8px; border-radius: 50%; background: #dbeafe; border: 1px solid #bfdbfe;"></div><span>Electro</span></div>
+                <form action="{{ route('shifts.index') }}" method="GET" id="month-selector-form" style="margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                    <input type="month" name="month" value="{{ $month }}" onchange="this.form.submit()" 
+                           style="padding: 0.4rem 0.75rem; border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-main); font-weight: 500; font-size: 0.9rem; cursor: pointer; outline: none; background: white;">
+                </form>
+                <!-- Dynamic Legend -->
+                <div style="display: flex; gap: 0.75rem; font-size: 0.7rem; color: var(--text-muted); align-items: center; background: #f8fafc; padding: 0.35rem 0.85rem; border-radius: 20px; border: 1px solid var(--border-color); flex-wrap: wrap; max-width: 800px;">
+                    <div style="font-weight: 700; color: #64748b; margin-right: 0.25rem;">ÁREAS:</div>
+                    @foreach($areas as $area)
+                        @php $color = $areaToColor[$area->id] ?? ['dot' => '#cbd5e1', 'bg' => '#f1f5f9']; @endphp
+                        <div style="display: flex; align-items: center; gap: 0.3rem;">
+                            <div style="width: 8px; height: 8px; border-radius: 50%; background: {{ $color['dot'] }};"></div>
+                            <span>{{ $area->name }}</span>
+                        </div>
+                    @endforeach
+                    
+                    <div style="width: 1px; height: 12px; background: #e2e8f0; margin: 0 0.25rem;"></div>
+                    <div style="font-weight: 700; color: #64748b; margin-right: 0.25rem;">TURNOS:</div>
+                    <div style="display: flex; align-items: center; gap: 0.3rem;"><div style="width: 8px; height: 8px; border-radius: 2px; background: #fee2e2; border: 1px solid #fecaca;"></div><span>Partido</span></div>
+                    <div style="display: flex; align-items: center; gap: 0.3rem;"><div style="width: 8px; height: 8px; border-radius: 2px; background: #f1f5f9; border: 1px solid #e2e8f0;"></div><span>Descanso</span></div>
+                    
+                    <div style="width: 1px; height: 12px; background: #e2e8f0; margin: 0 0.25rem;"></div>
+                    <div style="font-weight: 700; color: #64748b; margin-right: 0.25rem;">NOVEDADES:</div>
+                    <div style="display: flex; align-items: center; gap: 0.3rem;"><div style="width: 12px; height: 6px; border-radius: 1px; background: #fef3c7;"></div><span>VAC</span></div>
+                    <div style="display: flex; align-items: center; gap: 0.3rem;"><div style="width: 12px; height: 6px; border-radius: 1px; background: #fee2e2;"></div><span>INC</span></div>
+                    <div style="display: flex; align-items: center; gap: 0.3rem;"><div style="width: 12px; height: 6px; border-radius: 1px; background: #ffedd5;"></div><span>PER</span></div>
+                    <div style="display: flex; align-items: center; gap: 0.3rem;"><div style="width: 12px; height: 6px; border-radius: 1px; background: #fce7f3;"></div><span>CAL</span></div>
                 </div>
             </div>
         </div>
@@ -62,6 +80,39 @@
                     Generar 2 Semanas
                 </button>
             </form>
+
+            <form action="{{ route('shifts.generate_month') }}" method="POST" style="margin: 0;">
+                @csrf
+                <input type="hidden" name="month" value="{{ $month }}">
+                <button type="submit" style="padding: 0.6rem 1.25rem; background: #4f46e5; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2);">
+                    Generar Mes Completo
+                </button>
+            </form>
+
+            <form action="{{ route('shifts.clear_month') }}" method="POST" style="margin: 0;" onsubmit="return confirm('¿Estás seguro de que deseas eliminar TODOS los turnos de este mes? (Las novedades se mantendrán)')">
+                @csrf
+                <input type="hidden" name="month" value="{{ $month }}">
+                <button type="submit" style="padding: 0.6rem 1.25rem; background: white; border: 1px solid #ef4444; color: #ef4444; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;">
+                    Limpiar Turnos
+                </button>
+            </form>
+
+            <form action="{{ route('absences.clear_month') }}" method="POST" style="margin: 0;" onsubmit="return confirm('¿Estás seguro de que deseas eliminar TODAS las novedades de este mes? (Los turnos se mantendrán)')">
+                @csrf
+                <input type="hidden" name="month" value="{{ $month }}">
+                <button type="submit" style="padding: 0.6rem 1.25rem; background: white; border: 1px solid #f97316; color: #f97316; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;">
+                    Limpiar Novedades
+                </button>
+            </form>
+            
+            <button onclick="openNotesModal()" style="position: relative; padding: 0.6rem 1.25rem; background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-main); font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;">
+                📋 Notas
+                @if($generationNotes->count() > 0)
+                    <span style="position: absolute; top: -8px; right: -8px; background: #ef4444; color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 0.7rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+                        {{ $generationNotes->count() }}
+                    </span>
+                @endif
+            </button>
             
             <button style="padding: 0.6rem 1.25rem; background: #0f172a; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;">
                 Guardar Cambios
@@ -80,8 +131,9 @@
                                 @php 
                                     $currentDateObj = \Carbon\Carbon::parse($month)->setDay($i);
                                     $isToday = $currentDateObj->isToday();
+                                    $isSunday = $currentDateObj->dayOfWeek == 0;
                                 @endphp
-                                 <th class="day-header {{ $isToday ? 'current-day-header' : '' }}" 
+                                 <th class="day-header {{ $isToday ? 'current-day-header' : '' }} {{ $isSunday ? 'sunday-header' : '' }}" 
                                     {!! $isToday ? 'id="current-day-col"' : '' !!}
                                     onclick="selectDay(this, {{ $i }}, '{{ $currentDateObj->translatedFormat('l d') }}')"
                                     data-weekday="{{ $currentDateObj->dayOfWeek }}"
@@ -137,6 +189,7 @@
                                         $carbonDate = \Carbon\Carbon::parse($month)->setDay($i);
                                         $currentDate = $carbonDate->format('Y-m-d');
                                         $isTodayCell = $carbonDate->isToday();
+                                        $isSundayCell = $carbonDate->dayOfWeek == 0;
                                         
                                         // Ver si hay ausencia
                                         $isAbsent = false;
@@ -172,22 +225,13 @@
                                                 // Priority for colors
                                                 if($shift->type == 'partido') {
                                                     $columnClass .= ' shift-partido';
+                                                } else if ($shiftType == 'descanso') {
+                                                    $columnClass .= ' shift-descanso';
+                                                    $cellStyle = 'background-color: #f1f5f9; color: #64748b; font-weight: 500; font-size: 0.65rem;';
                                                 } else {
-                                                    // Identify area
-                                                    if (str_contains($areaNameData, 'electro')) {
-                                                        $columnClass .= ' area-electro';
-                                                    } elseif (str_contains($areaNameData, 'general')) {
-                                                        $columnClass .= ' area-general';
-                                                    } else {
-                                                        // Fallback to time-based
-                                                        $startTime = explode('-', $shift->schedule)[0];
-                                                        $hour = (int)explode(':', $startTime)[0];
-                                                        if ($hour < 10) {
-                                                            $columnClass .= ' shift-morning';
-                                                        } else {
-                                                            $columnClass .= ' shift-afternoon';
-                                                        }
-                                                    }
+                                                    // Dynamic Area Class
+                                                    $cleanAreaName = preg_replace('/[^a-z0-9]/', '', strtolower($shift->area->name ?? ''));
+                                                    $columnClass .= ' area-' . $cleanAreaName;
                                                 }
                                                 
                                                 $cellStyle = 'font-size: 0.75rem; line-height: 1.2;';
@@ -195,7 +239,7 @@
                                         }
                                     @endphp
                                     
-                                    <td class="editable-cell {{ $columnClass }} day-col-{{$i}}" 
+                                    <td class="editable-cell {{ $columnClass }} {{ $isSundayCell ? 'sunday-column' : '' }} day-col-{{$i}}" 
                                         data-day="{{$i}}"
                                         data-type="{{$shiftType}}"
                                         data-absence="{{$absenceType}}"
@@ -283,6 +327,14 @@
                         <!-- Dynamic area rows will be injected here -->
                     </div>
                 </div>
+
+                    <!-- Action Button for Timeline -->
+                    <div style="margin-top: 1.5rem; border-top: 1px solid #e2e8f0; padding-top: 1rem;">
+                        <a id="view-timeline-btn" href="{{ route('shifts.timeline') }}" 
+                           class="btn-generate-full" style="display: block; text-align: center; text-decoration: none; padding: 0.75rem;">
+                           📊 Visualizar Timeline Completo
+                        </a>
+                    </div>
             </div>
             </aside>
         </div>
@@ -322,6 +374,48 @@
                     <button type="submit" style="padding: 0.5rem 1rem; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">Guardar</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Generation Notes Modal -->
+    <div id="notesModal" style="display: none; position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
+        <div style="background: white; border-radius: 12px; width: 600px; max-width: 90%; max-height: 80vh; display: flex; flex-direction: column; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);">
+            <div style="padding: 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+                <h2 style="margin: 0; font-size: 1.25rem; color: var(--text-main);">Notas de Generación ({{ \Carbon\Carbon::parse($month)->translatedFormat('F Y') }})</h2>
+                <button onclick="closeNotesModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-muted);">✕</button>
+            </div>
+            <div style="padding: 1rem; overflow-y: auto; flex: 1;">
+                @if($generationNotes->isEmpty())
+                    <div style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                        No hay notas registradas para este mes.
+                    </div>
+                @else
+                    <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+                        <thead>
+                            <tr style="text-align: left; border-bottom: 2px solid var(--border-color);">
+                                <th style="padding: 0.75rem;">Fecha</th>
+                                <th style="padding: 0.75rem;">Empleado</th>
+                                <th style="padding: 0.75rem;">Mensaje</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($generationNotes as $note)
+                                <tr style="border-bottom: 1px solid var(--border-color); {{ $note->type == 'warning' ? 'background: #fffbeb;' : '' }}">
+                                    <td style="padding: 0.75rem; white-space: nowrap; vertical-align: top;">{{ \Carbon\Carbon::parse($note->date)->format('d/m') }}</td>
+                                    <td style="padding: 0.75rem; font-weight: 600; vertical-align: top;">{{ $note->employee->name ?? 'Sistema' }}</td>
+                                    <td style="padding: 0.75rem;">
+                                        @if($note->type == 'warning') <span style="color: #d97706;">⚠️</span> @endif
+                                        {{ $note->message }}
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                @endif
+            </div>
+            <div style="padding: 1rem; border-top: 1px solid var(--border-color); text-align: right;">
+                <button onclick="closeNotesModal()" style="padding: 0.5rem 1.5rem; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Cerrar</button>
+            </div>
         </div>
     </div>
 
@@ -430,15 +524,10 @@
             const cells = document.querySelectorAll(`.day-col-${dayNum}`);
             cells.forEach(c => c.classList.add('selected-day-column-highlight'));
             
-            // Calculate Stats
+            // Calculate Stats for Sidebar
             let totalEmployees = {{ count($employees) }};
-            let working = 0;
-            let normal = 0;
-            let partido = 0;
-            let vac = 0;
-            let inc = 0;
-            let cal = 0;
-            let permiso = 0;
+            let working = 0, normal = 0, partido = 0;
+            let vac = 0, inc = 0, cal = 0, permiso = 0;
             let areaCounts = {};
             
             cells.forEach(c => {
@@ -450,12 +539,9 @@
                     working++;
                     if (type === 'normal') normal++;
                     if (type === 'partido') partido++;
-                    
                     if (area) {
-                        const areaName = area.trim().toLowerCase();
-                        if (areaName) {
-                            areaCounts[areaName] = (areaCounts[areaName] || 0) + 1;
-                        }
+                        const a = area.trim().toLowerCase();
+                        if (a) areaCounts[a] = (areaCounts[a] || 0) + 1;
                     }
                 } else if (type === 'ausencia') {
                     if (absence === 'VAC') vac++;
@@ -467,7 +553,7 @@
             
             let libres = totalEmployees - working - (vac + inc + cal + permiso);
             
-            // Update panel
+            // Update panel elements
             document.getElementById('stat-total').innerText = working;
             document.getElementById('stat-normal').innerText = normal;
             document.getElementById('stat-partido').innerText = partido;
@@ -477,36 +563,47 @@
             document.getElementById('stat-permiso').innerText = permiso;
             document.getElementById('stat-libre').innerText = libres;
 
-            // Show/Hide rows based on count
             document.getElementById('row-vac').style.display = vac > 0 ? 'flex' : 'none';
             document.getElementById('row-inc').style.display = inc > 0 ? 'flex' : 'none';
             document.getElementById('row-cal').style.display = cal > 0 ? 'flex' : 'none';
             document.getElementById('row-permiso').style.display = permiso > 0 ? 'flex' : 'none';
             
-            // Update Dynamic Areas
+            // Update Areas
             const areaContainer = document.getElementById('area-stats-container');
             areaContainer.innerHTML = '';
-            
-            // Sort areas by count descending
             const sortedAreas = Object.keys(areaCounts).sort((a, b) => areaCounts[b] - areaCounts[a]);
-            
             if (sortedAreas.length === 0) {
                 areaContainer.innerHTML = '<div style="font-size: 0.8rem; color: var(--text-muted); text-align: center;">Sin áreas asignadas</div>';
             } else {
-                sortedAreas.forEach(areaName => {
+                sortedAreas.forEach(aName => {
                     const row = document.createElement('div');
                     row.className = 'stat-row';
-                    
-                    // Capitalize area name
-                    const displayLabel = areaName.charAt(0).toUpperCase() + areaName.slice(1);
-                    
-                    row.innerHTML = `
-                        <span>${displayLabel}</span>
-                        <span class="stat-value">${areaCounts[areaName]}</span>
-                    `;
+                    const label = aName.charAt(0).toUpperCase() + aName.slice(1);
+                    row.innerHTML = `<span>${label}</span><span class="stat-value">${areaCounts[aName]}</span>`;
                     areaContainer.appendChild(row);
                 });
             }
+
+            // Update Timeline Button Link
+            const timelineBtn = document.getElementById('view-timeline-btn');
+            if (timelineBtn) {
+                const monthBase = "{{ $month }}";
+                const dateStr = `${monthBase}-${String(dayNum).padStart(2, '0')}`;
+                timelineBtn.href = `{{ route('shifts.timeline', '') }}/${dateStr}`;
+            }
+        }
+
+        function closeMainSummary() {
+            document.getElementById('main-summary-panel').classList.remove('active');
+            document.getElementById('toggle-icon').innerText = '◀';
+        }
+
+        function openNotesModal() {
+            document.getElementById('notesModal').style.display = 'flex';
+        }
+
+        function closeNotesModal() {
+            document.getElementById('notesModal').style.display = 'none';
         }
 
         function openAbsenceModal(employeeId, employeeName) {
@@ -520,6 +617,13 @@
         }
     </script>
     <style>
+        .excel-table th.sunday-header {
+            background-color: #fda4af !important; /* Rosa 300 - más vibrante y visible */
+            color: #881337 !important;
+        }
+        .sunday-column {
+            background-color: #f8fafc !important;
+        }
         .layout-wrapper {
             display: flex;
             gap: 1.5rem;
@@ -903,6 +1007,39 @@
         #emp-sidebar::-webkit-scrollbar { width: 5px; }
         #emp-sidebar ::-webkit-scrollbar-track { background: #f8fafc; }
         #emp-sidebar ::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 3px; }
+
+        /* Dynamic Area Styles */
+        @foreach($areas as $area)
+            @php $c = $areaToColor[$area->id] ?? ['bg' => '#f1f5f9', 'text' => '#64748b', 'border' => '#e2e8f0']; @endphp
+            @php $cleanName = preg_replace('/[^a-z0-9]/', '', strtolower($area->name)); @endphp
+            .area-{{ $cleanName }} {
+                background-color: {{ $c['bg'] }} !important;
+                color: {{ $c['text'] }} !important;
+                border-left: 3px solid {{ $c['border'] }} !important;
+            }
+        @endforeach
+
+        /* Novelty Styles Override */
+        [data-absence="VAC"] { background-color: #fef3c7 !important; color: #b45309 !important; }
+        [data-absence="INC"] { background-color: #fee2e2 !important; color: #b91c1c !important; }
+        [data-absence="PER"] { background-color: #ffedd5 !important; color: #c2410c !important; }
+        [data-absence="CAL"] { background-color: #fce7f3 !important; color: #be185d !important; }
+
+        /* Timeline Styles */
+        .timeline-wrapper { min-width: 800px; padding: 10px; font-family: inherit; }
+        .timeline-header { display: grid; grid-template-columns: 120px repeat(64, 1fr); border-bottom: 2px solid #e2e8f0; margin-bottom: 5px; background: #fff; position: sticky; top: 0; z-index: 10; }
+        .time-label { font-size: 0.65rem; color: #64748b; text-align: center; grid-column: span 4; border-left: 1px solid #e2e8f0; padding: 2px 0; }
+        .timeline-body { display: flex; flex-direction: column; gap: 4px; }
+        .timeline-row { display: grid; grid-template-columns: 120px repeat(64, 1fr); align-items: center; background: #fff; border-radius: 4px; border: 1px solid #f1f5f9; height: 32px; transition: background 0.2s; }
+        .timeline-row:hover { background: #f8fafc; }
+        .area-label { font-size: 0.75rem; font-weight: 600; color: #334155; padding-left: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .timeline-grid-bg { display: contents; }
+        .grid-line { border-left: 1px solid #f1f5f9; height: 100%; grid-column: span 1; pointer-events: none; }
+        .grid-line-hour { border-left: 1px solid #e2e8f0; }
+        .timeline-block { height: 20px; border-radius: 3px; position: relative; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; font-weight: 700; color: white; text-shadow: 0 1px 1px rgba(0,0,0,0.1); box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .timeline-block:hover { filter: brightness(1.1); transform: scaleY(1.1); z-index: 5; }
+        .timeline-block::after { content: attr(data-tooltip); position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 4px 8px; border-radius: 4px; font-size: 10px; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 0.2s; margin-bottom: 5px; z-index: 100; }
+        .timeline-block:hover::after { opacity: 1; }
     </style>
 
     <script>
