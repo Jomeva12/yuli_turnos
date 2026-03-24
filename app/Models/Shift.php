@@ -11,7 +11,8 @@ class Shift extends Model
         'area_id',
         'date',
         'schedule',
-        'type'
+        'type',
+        'is_manual'
     ];
 
     public function employee()

@@ -10,14 +10,15 @@
         utf8_decode('àáâãäçèéêëìíîïñòóôõöùúûüýÿÀÁÂÃÄÇÈÉÊËÌÍÎÏÑÒÓÔÕÖÙÚÛÜÝ'), 
         'aaaaaceeeeiiiinooooouuuuyyAAAAACEEEEIIIINOOOOOUUUUY'));
     
-    // Define colors
+    // Define colors matching actual Areas
     $colors = [
-        'cosmetico' => '#ec4899',
-        'electrodomestico' => '#8b5cf6',
-        'buffet' => '#f59e0b',
-        'automotores' => '#10b981',
-        'domicilio' => '#3b82f6',
-        'general' => '#64748b'
+        'cosmetico'        => '#ec4899', // pink-500
+        'electrodomestico' => '#8b5cf6', // violet-500
+        'buffet'           => '#f59e0b', // amber-500
+        'marking'          => '#10b981', // emerald-500
+        'valery camacho'   => '#6366f1', // indigo-500
+        'domicilio'        => '#3b82f6', // blue-500
+        'general'          => '#64748b'  // slate-500
     ];
     $color = $colors[$normalizedAreaName] ?? '#64748b';
 @endphp
@@ -39,11 +40,11 @@
             $start = \Carbon\Carbon::createFromFormat('H:i', $startTimeStr);
             $end = \Carbon\Carbon::createFromFormat('H:i', $endTimeStr);
             
-            $startOffset = ($start->hour - 6) * 4 + ($start->minute / 15);
-            $endOffset = ($end->hour - 6) * 4 + ($end->minute / 15);
+            $startOffset = ($start->hour - 6) * 60 + $start->minute;
+            $endOffset = ($end->hour - 6) * 60 + $end->minute;
             
-            $colStart = max(2, $startOffset + 2);
-            $colEnd = min(66, $endOffset + 2);
+            $colStart = (int)max(2, $startOffset + 2);
+            $colEnd = (int)min(962, $endOffset + 2);
             
             if ($colStart >= $colEnd) continue;
         } catch (\Exception $e) {
@@ -53,7 +54,8 @@
 
     <div class="time-block" 
          style="grid-column: {{ $colStart }} / {{ $colEnd }}; background: {{ $color }};"
-         title="{{ $shift->employee->name }} | {{ $segment }} | {{ $rawAreaName }}">
+         title="{{ $shift->employee->name }} | {{ $segment }} | {{ $rawAreaName }}"
+         data-area="{{ $rawAreaName }}">
         @if(!$isIndividual)
             <span style="font-size: 0.6rem; opacity: 0.9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 4px;">
                 {{ $shift->employee->name }}

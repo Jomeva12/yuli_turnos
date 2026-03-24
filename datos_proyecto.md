@@ -4,6 +4,7 @@ En un mes, las personas deben descansar cuatro días, de esos cuatro dias 3 son 
 
 El usuario debe marcar las vacaciones, incapacidades.  Las vacaciones deben ser con un inicio y un final. Deben marcarse en todos los turnos del mes.
  
+ Los turnos deben ser equitativos para las personas, una semana de mañana, una de tarde y asi sucesivamente, la distribucion de los turnos partidos dos veces a la semana o una si se presta
  Debemos contar con un seeder de todas las personas que van a estar en la base de datos.(ya contamos con esto, muy bien)
  En el centro comercial existen unas áreas. Todas las personas no están habilitadas para trabajar en esas áreas. Por ende, debemos contar con una configuración en donde seleccionemos a la  persona y le marquemos en check las áreas que tiene disponible. (ya contamos con esto, muy bien)
 

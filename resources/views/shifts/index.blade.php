@@ -19,6 +19,104 @@
         $areaToColor[$area->id] = $skillColors[$index % count($skillColors)];
     }
 @endphp
+<style>
+    /* Quick Assign Modal Styles */
+    .qa-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        backdrop-filter: blur(4px);
+    }
+    .qa-modal {
+        background: white;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 800px;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        display: flex;
+        flex-direction: column;
+    }
+    .qa-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .qa-header h3 { margin: 0; font-size: 1.25rem; font-weight: 700; color: var(--text-main); }
+    .qa-body { padding: 1.5rem; }
+    .qa-columns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+    .qa-col-title {
+        font-size: 0.8rem;
+        font-weight: 800;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 1rem;
+        border-bottom: 2px solid var(--primary-light);
+        padding-bottom: 0.5rem;
+        text-align: center;
+    }
+    .qa-btn {
+        width: 100%;
+        padding: 0.6rem;
+        margin-bottom: 0.5rem;
+        background: white;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text-main);
+        cursor: pointer;
+        transition: all 0.2s;
+        text-align: center;
+    }
+    .qa-btn:hover {
+        background: var(--primary-light);
+        border-color: var(--primary);
+        color: var(--primary);
+        transform: translateY(-1px);
+    }
+    .qa-btn-descanso { border-color: #64748b; color: #64748b; }
+    .qa-btn-descanso:hover { background: #f8fafc; border-color: #1e293b; color: #1e293b; }
+    .qa-btn-limpiar { border-color: #ef4444; color: #ef4444; }
+    .qa-btn-limpiar:hover { background: #fee2e2; border-color: #dc2626; color: #dc2626; }
+    
+    .qa-footer {
+        padding: 1rem 1.5rem;
+        border-top: 1px solid var(--border-color);
+        text-align: right;
+    }
+    .btn-close-qa {
+        padding: 0.5rem 1rem;
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        color: #475569;
+        font-weight: 600;
+        cursor: pointer;
+    }
+    
+    /* Ensure trigger is always available on hover */
+    .editable-cell .cell-options-trigger {
+        opacity: 0;
+    }
+    .editable-cell:hover .cell-options-trigger {
+        opacity: 0.6;
+    }
+    .cell-options-trigger:hover {
+        opacity: 1 !important;
+    }
+</style>
 <div id="content-area">
     <!-- Alerts -->
     @if(session('success'))
@@ -61,25 +159,14 @@
                 </div>
             </div>
         </div>
-        
-        <div style="display: flex; gap: 0.75rem; align-items: center;">
-            <!-- Auto-Generate Day Form -->
-            <form action="{{ route('shifts.generate_day') }}" method="POST" style="margin: 0;">
-                @csrf
-                <input type="hidden" name="date" value="{{ \Carbon\Carbon::parse($month)->copy()->startOfMonth()->format('Y-m-d') }}">
-                <button type="submit" style="padding: 0.6rem 1.25rem; background: white; border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-main); font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
-                    Generar 1 Día
-                </button>
-            </form>
+        <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; justify-content: flex-end;">
+            <a href="{{ route('shifts.manual_index', ['month' => $month]) }}" 
+               style="padding: 0.6rem 1.25rem; background: #059669; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 6px -1px rgba(5, 150, 105, 0.2); text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;">
+                <svg style="width: 1rem; height: 1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                Asignación Manual
+            </a>
 
-            <form action="{{ route('shifts.generate_range') }}" method="POST" style="margin: 0;">
-                @csrf
-                <input type="hidden" name="date" value="{{ \Carbon\Carbon::parse($month)->copy()->startOfMonth()->format('Y-m-d') }}">
-                <input type="hidden" name="days" value="14">
-                <button type="submit" style="padding: 0.6rem 1.25rem; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);">
-                    Generar 2 Semanas
-                </button>
-            </form>
+
 
             <form action="{{ route('shifts.generate_month') }}" method="POST" style="margin: 0;">
                 @csrf
@@ -88,6 +175,12 @@
                     Generar Mes Completo
                 </button>
             </form>
+
+            <a href="{{ route('shifts.export', ['month' => $month]) }}" 
+               style="padding: 0.6rem 1.25rem; background: #1e293b; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.2); text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;">
+                <svg style="width: 1rem; height: 1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                Excel
+            </a>
 
             <form action="{{ route('shifts.clear_month') }}" method="POST" style="margin: 0;" onsubmit="return confirm('¿Estás seguro de que deseas eliminar TODOS los turnos de este mes? (Las novedades se mantendrán)')">
                 @csrf
@@ -114,9 +207,6 @@
                 @endif
             </button>
             
-            <button style="padding: 0.6rem 1.25rem; background: #0f172a; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;">
-                Guardar Cambios
-            </button>
         </div>
     </div>
 
@@ -145,7 +235,7 @@
                     </thead>
                     <tbody>
                         @foreach ($employees as $employee)
-                            <tr>
+                            <tr data-employee-id="{{ $employee->id }}">
                                 <td class="employee-cell" 
                                     onclick="openEmployeeSidebar({{ $employee->id }}, '{{ addslashes($employee->name) }}', this.querySelector('.emp-name-link'))"
                                     style="text-align: center; cursor: pointer; transition: background 0.2s;"
@@ -245,11 +335,9 @@
                                         data-absence="{{$absenceType}}"
                                         data-area="{{$areaNameData}}"
                                         style="{{ $cellStyle }}">
-                                        @if($shiftType != '')
-                                            <span class="cell-options-trigger" 
-                                                  onclick="event.stopPropagation(); alert('Gestionar turno: {{ $employee->name }} - Día {{ $i }}')"
-                                                  title="Opciones">⋮</span>
-                                        @endif
+                                        <span class="cell-options-trigger" 
+                                              onclick="event.stopPropagation(); openQuickAssignModal({{ $employee->id }}, '{{ addslashes($employee->name) }}', '{{ $currentDate }}', {{ $i }})"
+                                              title="Opciones">⋮</span>
                                         {!! $cellContent !!}
                                     </td>
                                 @endfor
@@ -329,10 +417,24 @@
                 </div>
 
                     <!-- Action Button for Timeline -->
-                    <div style="margin-top: 1.5rem; border-top: 1px solid #e2e8f0; padding-top: 1rem;">
+                    <div style="margin-top: 1.5rem; border-top: 1px solid #e2e8f0; padding-top: 1.25rem;">
                         <a id="view-timeline-btn" href="{{ route('shifts.timeline') }}" 
-                           class="btn-generate-full" style="display: block; text-align: center; text-decoration: none; padding: 0.75rem;">
-                           📊 Visualizar Timeline Completo
+                           style="display: block; background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); padding: 1.25rem; border-radius: 16px; text-decoration: none; color: white; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2); border: 1px solid rgba(255,255,255,0.1);"
+                           onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 12px 20px -5px rgba(79, 70, 229, 0.3)';"
+                           onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(79, 70, 229, 0.2)';"
+                           target="_blank">
+                            <div style="display: flex; align-items: center; gap: 1rem;">
+                                <div style="background: rgba(255,255,255,0.2); padding: 0.75rem; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);">
+                                    📊
+                                </div>
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 800; font-size: 1rem; color: white; margin-bottom: 2px; letter-spacing: -0.01em;">Cronograma de Cobertura</div>
+                                    <div style="font-size: 0.75rem; color: rgba(255,255,255,0.85); font-weight: 500;">Ver distribución horaria detallada</div>
+                                </div>
+                                <div style="font-size: 1rem; opacity: 0.8; transform: translateX(0); transition: transform 0.2s;" onmouseover="this.style.transform='translateX(3px)'" onmouseout="this.style.transform='translateX(0)'">
+                                    <svg style="width: 20px; height: 20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+                                </div>
+                            </div>
                         </a>
                     </div>
             </div>
@@ -832,26 +934,33 @@
     <div id="emp-sidebar" style="
         position: fixed;
         top: 0; right: 0;
-        width: 400px;
+        width: 550px;
         height: 100vh;
-        background: white;
+        background: #ffffff;
         z-index: 1101;
-        box-shadow: -8px 0 40px rgba(0,0,0,0.18);
+        box-shadow: -10px 0 50px rgba(15, 23, 42, 0.15);
         transform: translateX(100%);
-        transition: transform 0.35s cubic-bezier(.4,0,.2,1);
+        transition: transform 0.4s cubic-bezier(.4,0,.2,1);
         display: flex;
         flex-direction: column;
         overflow: hidden;
+        border-left: 1px solid #e2e8f0;
     ">
         <!-- Header -->
-        <div style="background: linear-gradient(135deg, var(--primary) 0%, #0d7a63 100%); color: white; padding: 1.25rem 1.25rem 1rem; flex-shrink: 0;">
-            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+        <div style="background: #0f172a; color: white; padding: 1.5rem; flex-shrink: 0; position: relative; overflow: hidden;">
+            <!-- Subtle accent light -->
+            <div style="position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; background: rgba(59, 130, 246, 0.2); filter: blur(40px); border-radius: 50%;"></div>
+            
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; position: relative; z-index: 1;">
                 <div>
-                    <div style="font-size:0.7rem; opacity:0.8; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:4px;">Resumen Mensual</div>
-                    <div id="esb-name" style="font-size:1.1rem; font-weight:800; line-height:1.2;">—</div>
-                    <div id="esb-month" style="font-size:0.78rem; opacity:0.75; margin-top:3px;">{{ \Carbon\Carbon::parse($month)->translatedFormat('F Y') }}</div>
+                    <div style="font-size:0.75rem; opacity:0.6; text-transform:uppercase; letter-spacing:0.1em; font-weight: 700; margin-bottom:6px;">Perfil del Asesor</div>
+                    <div id="esb-name" style="font-size:1.5rem; font-weight:800; line-height:1.1; letter-spacing: -0.02em;">—</div>
+                    <div id="esb-month" style="font-size:0.85rem; opacity:0.7; margin-top:6px; display: flex; align-items: center; gap: 0.5rem;">
+                        <svg style="width: 14px; height: 14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        {{ $carbonDate->translatedFormat('F Y') }}
+                    </div>
                 </div>
-                <button onclick="closeEmployeeSidebar()" style="background:rgba(255,255,255,0.15); border:none; color:white; width:30px; height:30px; border-radius:50%; cursor:pointer; font-size:1rem; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">✕</button>
+                <button onclick="closeEmployeeSidebar()" style="background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.1); color:white; width:34px; height:34px; border-radius:10px; cursor:pointer; font-size:1rem; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.2)'; this.style.transform='scale(1.05)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'; this.style.transform='scale(1)'">✕</button>
             </div>
 
             <!-- Stat pills at top -->
@@ -929,26 +1038,53 @@
                 <div id="esb-areas">—</div>
             </div>
 
-            <!-- Button -->
+        </div>
+
+        <!-- Footer with fixed buttons -->
+        <div style="padding: 1.25rem; background: #ffffff; border-top: 1px solid #f1f5f9; flex-shrink: 0; display: flex; flex-direction: column; gap: 8px;">
+            <a
+                id="esb-manual-btn"
+                href="#"
+                style="flex: 1; text-decoration:none; text-align:center; padding:0.8rem 1rem; background: #3b82f6; color:white; border:none; border-radius:12px; font-weight:700; font-size:0.9rem; cursor:pointer; transition:all 0.2s; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2); border: 1px solid transparent;"
+                onmouseover="this.style.background='#2563eb'; this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 15px rgba(59, 130, 246, 0.25)'" 
+                onmouseout="this.style.background='#3b82f6'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(59, 130, 246, 0.2)'"
+            >
+                <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <svg style="width: 18px; height: 18px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    Asignar Turnos manualmente
+                </div>
+            </a>
             <button
                 id="esb-absence-btn"
                 onclick=""
-                style="width:100%; margin-top:0.75rem; padding:0.65rem 1rem; background:var(--primary); color:white; border:none; border-radius:8px; font-weight:600; font-size:0.85rem; cursor:pointer; transition:opacity 0.2s;"
-                onmouseover="this.style.opacity='0.88'" onmouseout="this.style.opacity='1'"
-            >+ Registrar Novedad</button>
+                style="flex: 1; padding:0.8rem 1rem; background: #0f172a; color:white; border:none; border-radius:12px; font-weight:700; font-size:0.9rem; cursor:pointer; transition:all 0.2s; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.1); border: 1px solid transparent;"
+                onmouseover="this.style.background='#1e293b'; this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 15px rgba(15, 23, 42, 0.15)'" 
+                onmouseout="this.style.background='#0f172a'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(15, 23, 42, 0.1)'"
+            >
+                <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <svg style="width: 18px; height: 18px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    Registrar Novedad
+                </div>
+            </button>
         </div>
     </div>
 
     <style>
         .esb-pill {
-            background: rgba(255,255,255,0.18);
-            border-radius: 20px;
-            padding: 3px 10px;
-            font-size: 0.75rem;
-            font-weight: 600;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 6px 14px;
+            border-radius: 12px;
+            font-size: 0.85rem;
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 8px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .esb-pill:hover {
+            background: rgba(255,255,255,0.15);
+            transform: translateY(-1px);
         }
         .esb-section {
             margin-bottom: 1rem;
@@ -991,18 +1127,19 @@
         .esb-row-container:hover .esb-row { background: #f8fafc; }
         .esb-badge {
             font-weight: 700;
-            font-size: 0.78rem;
-            color: var(--primary);
-            background: rgba(0,128,100,0.08);
-            padding: 2px 8px;
-            border-radius: 20px;
-            min-width: 24px;
+            font-size: 0.85rem;
+            color: #1e293b;
+            background: #f1f5f9;
+            padding: 4px 12px;
+            border-radius: 8px;
+            min-width: 32px;
             text-align: center;
+            border: 1px solid #e2e8f0;
         }
-        .esb-badge-blue   { color: #0284c7; background: rgba(2,132,199,0.08); }
-        .esb-badge-red    { color: #dc2626; background: rgba(220,38,38,0.08); }
-        .esb-badge-green  { color: #16a34a; background: rgba(22,163,74,0.08); }
-        .esb-badge-orange { color: #d97706; background: rgba(217,119,6,0.08); }
+        .esb-badge-blue   { color: #2563eb; background: #eff6ff; border-color: #dbeafe; }
+        .esb-badge-red    { color: #dc2626; background: #fef2f2; border-color: #fee2e2; }
+        .esb-badge-green  { color: #059669; background: #ecfdf5; border-color: #d1fae5; }
+        .esb-badge-orange { color: #d97706; background: #fffbeb; border-color: #fef3c7; }
 
         #emp-sidebar::-webkit-scrollbar { width: 5px; }
         #emp-sidebar ::-webkit-scrollbar-track { background: #f8fafc; }
@@ -1080,7 +1217,7 @@
                 else if (abs === 'INC') { inc++; days_inc.push(day); workStreak.push(false); }
                 else if (abs === 'PER') { per++; days_per.push(day); workStreak.push(false); }
                 else if (abs === 'CAL') { cal++; days_cal.push(day); workStreak.push(false); }
-                else if (type === '' || type === 'ausencia') {
+                else if (type === '' || type === 'ausencia' || type === 'descanso') {
                     // Rest day (--)
                     totalRest++;
                     days_rest.push(day);
@@ -1184,6 +1321,11 @@
             const absBtn = document.getElementById('esb-absence-btn');
             absBtn.onclick = () => { closeEmployeeSidebar(); openAbsenceModal(empId, empName); };
 
+            // Manual Assignment button
+            const manualBtn = document.getElementById('esb-manual-btn');
+            const monthVal = "{{ $month }}";
+            manualBtn.href = `{{ url('employees') }}/${empId}/manual-shifts?month=${monthVal}`;
+
             // Open sidebar
             const sidebar  = document.getElementById('emp-sidebar');
             const overlay  = document.getElementById('emp-sidebar-overlay');
@@ -1197,6 +1339,194 @@
             const ov = document.getElementById('emp-sidebar-overlay');
             ov.style.opacity = '0';
             ov.style.pointerEvents = 'none';
+        }
+    </script>
+
+    <!-- Quick Assign Modal -->
+    <div id="qa-modal-overlay" class="qa-modal-overlay" onclick="closeQuickAssignModal(event)">
+        <div class="qa-modal" onclick="event.stopPropagation()">
+            <div class="qa-header">
+                <h3>Asignar Turno: <span id="qa-emp-name" style="color: var(--primary);"></span></h3>
+                <div id="qa-date-display" style="font-weight: 600; color: var(--text-muted);"></div>
+            </div>
+            <div class="qa-body">
+                <div class="qa-columns">
+                    <!-- Morning -->
+                    <div>
+                        <div class="qa-col-title">Mañana</div>
+                        @foreach($groupedTemplates['mañana'] ?? [] as $t)
+                            <button class="qa-btn" onclick="saveQuickShift('{{ $t->schedule }}', '{{ $t->type }}')">
+                                {{ $t->schedule }}
+                            </button>
+                        @endforeach
+                    </div>
+                    <!-- Afternoon -->
+                    <div>
+                        <div class="qa-col-title">Tarde</div>
+                        @foreach($groupedTemplates['tarde'] ?? [] as $t)
+                            <button class="qa-btn" onclick="saveQuickShift('{{ $t->schedule }}', '{{ $t->type }}')">
+                                {{ $t->schedule }}
+                            </button>
+                        @endforeach
+                    </div>
+                    <!-- Others -->
+                    <div>
+                        <div class="qa-col-title">Otros / Gestión</div>
+                        @foreach($groupedTemplates['partido'] ?? [] as $t)
+                            <button class="qa-btn" style="border-color: #fca5a5; color: #b91c1c;" onclick="saveQuickShift('{{ $t->schedule }}', '{{ $t->type }}')">
+                                {{ $t->schedule }} (P)
+                            </button>
+                        @endforeach
+                        
+                        <button class="qa-btn qa-btn-descanso" onclick="saveQuickShift('DESCANSO', 'descanso')">
+                            DESCANSO
+                        </button>
+                        
+                        <button class="qa-btn qa-btn-limpiar" onclick="saveQuickShift('NONE', 'none')">
+                            LIMPIAR DÍA
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="qa-footer">
+                <button class="btn-close-qa" onclick="closeQuickAssignModal()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentQaData = {
+            employeeId: null,
+            date: null,
+            dayIndex: null
+        };
+
+        function openQuickAssignModal(empId, empName, date, dayIndex) {
+            currentQaData = { employeeId: empId, date: date, dayIndex: dayIndex };
+            
+            document.getElementById('qa-emp-name').textContent = empName;
+            
+            // Format date for display
+            const dateObj = new Date(date + 'T00:00:00');
+            const options = { weekday: 'long', day: 'numeric', month: 'long' };
+            document.getElementById('qa-date-display').textContent = dateObj.toLocaleDateString('es-ES', options);
+            
+            document.getElementById('qa-modal-overlay').style.display = 'flex';
+        }
+
+        function closeQuickAssignModal(event) {
+            document.getElementById('qa-modal-overlay').style.display = 'none';
+        }
+
+        function saveQuickShift(schedule, type) {
+            const overlay = document.getElementById('qa-modal-overlay');
+            overlay.style.pointerEvents = 'none';
+            overlay.style.opacity = '0.7';
+
+            fetch('{{ route("api.shifts.manual_assign") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({
+                    employee_id: currentQaData.employeeId,
+                    date: currentQaData.date,
+                    schedule: schedule,
+                    type: type
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateMainCellUI(currentQaData.dayIndex, currentQaData.employeeId, schedule, type, data.shift);
+                    closeQuickAssignModal();
+                } else {
+                    alert('Error: ' + (data.message || 'No se pudo guardar'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error de conexión');
+            })
+            .finally(() => {
+                overlay.style.pointerEvents = 'all';
+                overlay.style.opacity = '1';
+            });
+        }
+
+        function updateMainCellUI(dayIndex, empId, schedule, type, shiftData) {
+            const targetRow = document.querySelector(`tr[data-employee-id="${empId}"]`);
+            if (!targetRow) {
+                console.error(`Row for employee ${empId} not found`);
+                return;
+            }
+            
+            const targetCell = targetRow.querySelector(`.day-col-${dayIndex}`);
+            if (!targetCell) {
+                console.error(`Cell for day ${dayIndex} not found in row for employee ${empId}`);
+                return;
+            }
+
+            // Clear existing styles and classes but keep the ones that matter
+            targetCell.style.backgroundColor = '';
+            targetCell.style.color = '';
+            targetCell.className = `editable-cell day-col-${dayIndex}`;
+            
+            if (schedule === 'NONE') {
+                targetCell.innerHTML = `
+                    <span class="cell-options-trigger" 
+                          onclick="event.stopPropagation(); openQuickAssignModal(${empId}, '', '${currentQaData.date}', ${dayIndex})"
+                          title="Opciones">⋮</span>
+                    --
+                `;
+                targetCell.setAttribute('data-type', '');
+                targetCell.setAttribute('data-area', '');
+            } else {
+                const formattedSchedule = schedule.replace('|', '<br>');
+                targetCell.innerHTML = `
+                    <span class="cell-options-trigger" 
+                          onclick="event.stopPropagation(); openQuickAssignModal(${empId}, '', '${currentQaData.date}', ${dayIndex})"
+                          title="Opciones">⋮</span>
+                    ${formattedSchedule}
+                `;
+                
+                // Update attributes for filtering/logic
+                targetCell.setAttribute('data-type', type);
+                if (shiftData && shiftData.area) {
+                    const areaName = shiftData.area.name.toLowerCase();
+                    targetCell.setAttribute('data-area', areaName);
+                    
+                    // Apply area color class
+                    const cleanAreaName = areaName.replace(/[^a-z0-9]/g, '');
+                    targetCell.classList.add('area-' + cleanAreaName);
+                }
+
+                if (type === 'partido') targetCell.classList.add('shift-partido');
+                else if (type === 'descanso') {
+                    targetCell.classList.add('shift-descanso');
+                    targetCell.style.backgroundColor = '#f1f5f9';
+                    targetCell.style.color = '#64748b';
+                    targetCell.style.fontWeight = '500';
+                    targetCell.style.fontSize = '0.65rem';
+                } else {
+                    targetCell.style.fontSize = '0.75rem';
+                    targetCell.style.lineHeight = '1.2';
+                }
+            }
+
+            // If the modified day is the one currently selected in the sidebar, refresh it
+            const selectedHeader = document.querySelector('.selected-day-header');
+            if (selectedHeader) {
+                const dayMatch = selectedHeader.innerText.match(/\d+/);
+                if (dayMatch) {
+                    const selectedDayNum = parseInt(dayMatch[0]);
+                    if (selectedDayNum === parseInt(dayIndex)) {
+                        // Re-trigger day selection to update sidebar stats
+                        selectDay(selectedHeader, dayIndex, currentQaData.date); 
+                    }
+                }
+            }
         }
     </script>
 
