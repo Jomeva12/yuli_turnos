@@ -225,10 +225,10 @@
                                 @endphp
                                  <th class="day-header {{ $isToday ? 'current-day-header' : '' }} {{ $isSunday ? 'sunday-header' : '' }}" 
                                     {!! $isToday ? 'id="current-day-col"' : '' !!}
-                                    onclick="selectDay(this, {{ $i }}, '{{ $currentDateObj->translatedFormat('l d') }}')"
+                                    onclick="selectDay(this, {{ $i }}, '{{ $currentDateObj->locale('es')->translatedFormat('l d') }}')"
                                     data-weekday="{{ $currentDateObj->dayOfWeek }}"
                                     style="cursor: pointer;">
-                                    <span style="text-transform: capitalize;">{{ $currentDateObj->translatedFormat('D') }}</span> {{ $i }}
+                                    <span style="text-transform: capitalize;">{{ $currentDateObj->locale('es')->translatedFormat('D') }}</span> {{ $i }}
                                 </th>
                             @endfor
                         </tr>
@@ -957,7 +957,7 @@
                     <div id="esb-name" style="font-size:1.5rem; font-weight:800; line-height:1.1; letter-spacing: -0.02em;">—</div>
                     <div id="esb-month" style="font-size:0.85rem; opacity:0.7; margin-top:6px; display: flex; align-items: center; gap: 0.5rem;">
                         <svg style="width: 14px; height: 14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                        {{ $carbonDate->translatedFormat('F Y') }}
+                        {{ $carbonDate->locale('es')->translatedFormat('F Y') }}
                     </div>
                 </div>
                 <button onclick="closeEmployeeSidebar()" style="background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.1); color:white; width:34px; height:34px; border-radius:10px; cursor:pointer; font-size:1rem; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.2)'; this.style.transform='scale(1.05)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'; this.style.transform='scale(1)'">✕</button>

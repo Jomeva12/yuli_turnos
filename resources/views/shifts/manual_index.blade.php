@@ -67,7 +67,8 @@
         border: 1px solid var(--border-color);
         /* Remove padding to avoid sticky element offset issues */
         padding: 0;
-        overflow-x: auto;
+        overflow: auto; /* Enable both X and Y scroll */
+        height: calc(100vh - 200px); /* Fixed height for vertical scroll */
         box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
         scrollbar-width: thin;
         scrollbar-color: var(--primary) transparent;
@@ -170,15 +171,22 @@
 
     /* Ensure specific headers stay sticky on top too if scrolled down */
     .day-head.sticky-col {
-        z-index: 101;
+        position: sticky !important;
+        top: 0 !important;
+        left: 0 !important;
+        z-index: 200 !important;
+        background-color: #f8fafc !important;
     }
 
     .day-head {
-        background: #f8fafc;
+        background: #f8fafc !important;
         font-weight: 700;
         color: var(--text-main);
         font-size: 0.75rem;
         height: 40px !important;
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 50 !important;
     }
 
     .is-sunday { background: #fee2e2 !important; }
@@ -360,7 +368,7 @@
                                     $isSunday = $carbonDate->dayOfWeek == 0;
                                 @endphp
                                 <th class="day-head {{ $isSunday ? 'is-sunday' : '' }}">
-                                    {{ $carbonDate->translatedFormat('D') }}<br>{{ $i }}
+                                    {{ $carbonDate->locale('es')->translatedFormat('D') }}<br>{{ $i }}
                                 </th>
                             @endfor
                         </tr>
